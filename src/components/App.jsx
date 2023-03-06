@@ -1,9 +1,7 @@
-
-import React, { Component } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import Notiflix from 'notiflix';
 
-import { API_KEY, BASE_URL, SEARCH_PARAMS } from 'services/pictures-api';
+import getData from 'services/pictures-api';
 
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
@@ -12,85 +10,95 @@ import Modal from './Modal/Modal';
 import Loader from './Loader/Loader';
 import Button from './Button/Button';
 
-export class App extends Component {
-  state = {
-    hits: [],
-    searchQuery: '',
-    page: 1,
-    per_page: 12,
-    showModal: false,
-    loading: false,
-    largeImageURL: '',
-    tags: '',
-  };
-  toggleModal = (imageURL, tag) => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-      largeImageURL: imageURL,
-      tags: tag,
-    }));
+function App() {
+  const [hits, setHits] = useState('');
+  const [totalHits, setTotalHits] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [per_page, setPer_page] = useState(12);
+  const [showModal, setShowModal] = useState(false);
+  const [largeImageURL, setLargeImageURL] = useState('');
+  const [tags, setTags] = useState('');
+  const [loading, setLoading] = useState('');
+
+  const toggleModal = (imageURL, tag) => {
+    setShowModal(!showModal);
+    setLargeImageURL(imageURL);
+    setTags(tag);
   };
 
-  getValue = ({ searchQuery, page }) => {
-    this.setState({ loading: true });
-  
+  const getValue = async (searchQuery, page) => {
+    setLoading(true);
+
     try {
-      axios
-        .get(
-          `${BASE_URL}?key=${API_KEY}&q=${searchQuery}&page=${page}&${SEARCH_PARAMS}`
-        )
-        .then(response => {
-          if (!response.data.hits.length) {
-            Notiflix.Notify.failure('No image found!');
-          } else if (searchQuery === this.state.searchQuery) {
-            this.setState(prevState => ({
-              hits: [...prevState.hits, ...response.data.hits],
-              searchQuery: searchQuery,
-              page: prevState.page + 1,
-            }));
-          } else {
-            this.setState(prevState => ({
-              hits: response.data.hits,
-              totalHits: response.data.totalHits,
-              searchQuery: searchQuery,
-              page: prevState.page + 1,
-            }));
-          }
-        });
+      const data = await getData({ searchQuery, page });
+      if (!data.hits.length) {
+        Notiflix.Notify.failure('No image found!');
+        reset();
+      }
+      setHits(prevState => [...prevState, ...data.hits]);
+      setTotalHits(data.totalHits);
+      // } else if (searchQuery === searchQuery) {
+      // setHits([...data.hits]);
+      // setSearchQuery(searchQuery);
+      //  setSearchQuery(prevState => prevState);
+      // setHits(prevState => [...prevState, ...data.hits]);
+      // setPage(prevState => prevState + 1);
+      // } else {
+      //   setHits(data.hits);
+      //   setTotalHits(data.hits);
+      // setSearchQuery(prevState => prevState);
+      // setPage(prevState => prevState + 1);
+      // }
     } catch (error) {
       console.error(error.message);
     } finally {
-      this.setState({
-        loading: false,
-      });
+      setLoading(false);
     }
   };
 
-  loadMore = () => {
-    this.getValue(this.state);
+  const reset = () => {
+    setPage(1);
+    setHits([]);
   };
 
-  render() {
+  useEffect(() => {
+    if (!searchQuery) return;
 
-    const { hits, showModal, loading, largeImageURL, tags, per_page, page, totalHits } = this.state;
-    return (
-      <div>
-        <Searchbar onSubmit={this.getValue} />
-        {loading && <Loader />}
-        {hits && (
-          <ImageGallery>
-            <ImageGalleryItem pictures={hits} onImage={this.toggleModal} />
-          </ImageGallery>
-        )}
+    getValue();
+  }, [searchQuery]);
 
-        {showModal && (
-          <Modal onClose={this.toggleModal} url={largeImageURL} alt={tags} />
-        )}
+  useEffect(() => {
+    if (page === 1) return;
 
-        {page < Math.ceil(totalHits / per_page)  && <Button onClick={() => this.loadMore()} />}
-      </div>
-    );
-  }
+    getValue();
+  }, [page]);
+
+  const loadMore = () => {
+    // getValue(searchQuery, page);
+    // setSearchQuery(prevState => prevState);
+    setPage(prevState => prevState + 1);
+  };
+
+  return (
+    <div>
+      <Searchbar onSubmit={getValue} />
+      {loading && <Loader />}
+      {hits && (
+        <ImageGallery>
+          <ImageGalleryItem pictures={hits} onImage={toggleModal} />
+        </ImageGallery>
+      )}
+
+      {showModal && (
+        <Modal onClose={toggleModal} url={largeImageURL} alt={tags} />
+      )}
+
+      {page < Math.ceil(totalHits / per_page) && (
+        <Button onClick={() => loadMore()} />
+      )}
+    </div>
+  );
 }
 
 export default App;

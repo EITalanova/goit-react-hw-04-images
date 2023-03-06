@@ -1,38 +1,38 @@
-import React, { Component } from 'react';
+import { useEffect } from 'react';
 import css from './Modal.module.css';
 
-class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
-  }
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
-  }
-  handleKeyDown = e => {
+function Modal({ onClose, url, alt }) {
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {window.removeEventListener('keydown', handleKeyDown);}
+  }, [])
+  // componentWillUnmount() {
+  //   window.removeEventListener('keydown', handleKeyDown);
+  // }
+  const handleKeyDown = e => {
     if (e.code === 'Escape') {
-      this.props.onClose();
+      onClose();
     }
   };
 
-  handleBackdpropClick = e => {
+  const handleBackdpropClick = e => {
     if (e.currentTarget === e.target) {
-      this.props.onClose();
+      onClose();
     }
   };
 
-  render() {
-    const { url, alt } = this.props;
+    // const { url, alt } = this.props;
     return (
-      <div className={css.overlay} onClick={this.handleBackdpropClick}>
+      <div className={css.overlay} onClick={handleBackdpropClick}>
         <div className={css.modal}>
           <img src={url} alt={alt} />
-          <button className={css.closeBtn} onClick={this.handleBackdpropClick}>
+          <button className={css.closeBtn} onClick={handleBackdpropClick}>
             ⛌
           </button>
         </div>
       </div>
     );
-  }
+  
 }
 
 export default Modal;

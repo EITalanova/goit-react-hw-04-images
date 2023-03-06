@@ -6,7 +6,7 @@ const Loader = () => {
     <div className={css.container}>
       <MagnifyingGlass
         display="flex"
-        justify-content="center"
+        justifyContent="center"
         visible={true}
         height="80"
         width="80"
