@@ -4,11 +4,10 @@ import css from './Modal.module.css';
 function Modal({ onClose, url, alt }) {
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
-    return () => {window.removeEventListener('keydown', handleKeyDown);}
+    return () => { window.removeEventListener('keydown', handleKeyDown); }
+    // eslint-disable-next-line
   }, [])
-  // componentWillUnmount() {
-  //   window.removeEventListener('keydown', handleKeyDown);
-  // }
+
   const handleKeyDown = e => {
     if (e.code === 'Escape') {
       onClose();
