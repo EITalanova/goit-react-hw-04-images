@@ -4,7 +4,7 @@ import css from './Searchbar.module.css';
 
 function Searchbar({ onSubmit }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
 
   const handleInputChange = e => {
     setSearchQuery(e.currentTarget.value);

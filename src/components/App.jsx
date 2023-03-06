@@ -15,7 +15,7 @@ function App() {
   const [totalHits, setTotalHits] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
-  const [per_page, setPer_page] = useState(12);
+  const [per_page] = useState(12);
   const [showModal, setShowModal] = useState(false);
   const [largeImageURL, setLargeImageURL] = useState('');
   const [tags, setTags] = useState('');
@@ -36,8 +36,9 @@ function App() {
         Notiflix.Notify.failure('No image found!');
         reset();
       }
-      setHits(prevState => [...prevState, ...data.hits]);
+      setHits(prevState => [ ...data.hits]);
       setTotalHits(data.totalHits);
+      setSearchQuery(prevState => prevState);
       // } else if (searchQuery === searchQuery) {
       // setHits([...data.hits]);
       // setSearchQuery(searchQuery);
@@ -66,12 +67,14 @@ function App() {
     if (!searchQuery) return;
 
     getValue();
+    // eslint-disable-next-line 
   }, [searchQuery]);
 
   useEffect(() => {
     if (page === 1) return;
 
     getValue();
+    // eslint-disable-next-line 
   }, [page]);
 
   const loadMore = () => {
