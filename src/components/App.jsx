@@ -21,36 +21,17 @@ function App() {
   const [tags, setTags] = useState('');
   const [loading, setLoading] = useState('');
 
-  const toggleModal = (imageURL, tag) => {
-    setShowModal(!showModal);
-    setLargeImageURL(imageURL);
-    setTags(tag);
-  };
-
   const getValue = async (searchQuery, page) => {
     setLoading(true);
-
     try {
       const data = await getData({ searchQuery, page });
       if (!data.hits.length) {
         Notiflix.Notify.failure('No image found!');
         reset();
+      } else {
+        setHits(prevState => [...prevState, ...data.hits]);
+        setTotalHits(data.totalHits);
       }
-      setHits(prevState => [ ...data.hits]);
-      setTotalHits(data.totalHits);
-      setSearchQuery(prevState => prevState);
-      // } else if (searchQuery === searchQuery) {
-      // setHits([...data.hits]);
-      // setSearchQuery(searchQuery);
-      //  setSearchQuery(prevState => prevState);
-      // setHits(prevState => [...prevState, ...data.hits]);
-      // setPage(prevState => prevState + 1);
-      // } else {
-      //   setHits(data.hits);
-      //   setTotalHits(data.hits);
-      // setSearchQuery(prevState => prevState);
-      // setPage(prevState => prevState + 1);
-      // }
     } catch (error) {
       console.error(error.message);
     } finally {
@@ -66,26 +47,34 @@ function App() {
   useEffect(() => {
     if (!searchQuery) return;
 
-    getValue();
-    // eslint-disable-next-line 
+    getValue(searchQuery, page);
+    // eslint-disable-next-line
   }, [searchQuery]);
 
   useEffect(() => {
     if (page === 1) return;
-
-    getValue();
-    // eslint-disable-next-line 
+    getValue(searchQuery, page);
+    // eslint-disable-next-line
   }, [page]);
 
   const loadMore = () => {
-    // getValue(searchQuery, page);
-    // setSearchQuery(prevState => prevState);
     setPage(prevState => prevState + 1);
+  };
+
+  const toggleModal = (imageURL, tag) => {
+    setShowModal(!showModal);
+    setLargeImageURL(imageURL);
+    setTags(tag);
+  };
+
+  const onInputSubmit = searchQuery => {
+    setSearchQuery(searchQuery);
+    reset();
   };
 
   return (
     <div>
-      <Searchbar onSubmit={getValue} />
+      <Searchbar onSubmit={onInputSubmit} />
       {loading && <Loader />}
       {hits && (
         <ImageGallery>
@@ -97,7 +86,7 @@ function App() {
         <Modal onClose={toggleModal} url={largeImageURL} alt={tags} />
       )}
 
-      {page < Math.ceil(totalHits / per_page) && (
+      {(page < Math.ceil(totalHits / per_page) && hits.length>0) && (
         <Button onClick={() => loadMore()} />
       )}
     </div>

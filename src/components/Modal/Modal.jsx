@@ -20,7 +20,6 @@ function Modal({ onClose, url, alt }) {
     }
   };
 
-    // const { url, alt } = this.props;
     return (
       <div className={css.overlay} onClick={handleBackdpropClick}>
         <div className={css.modal}>
