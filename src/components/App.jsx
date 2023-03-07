@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Notiflix from 'notiflix';
 
-import getData from 'services/pictures-api';
+import getData from '../services/pictures-api';
 
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
